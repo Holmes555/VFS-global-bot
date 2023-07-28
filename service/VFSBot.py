@@ -53,7 +53,7 @@ class VFSBot:
 
         captcha_img = self.browser.find_element(by=By.ID, value='CaptchaImage')
 
-        self.captcha_filename = 'captcha.png'
+        self.captcha_filename = 'data/captcha.png'
         with open(self.captcha_filename, 'wb') as file:
             file.write(captcha_img.screenshot_as_png)
 
@@ -178,7 +178,7 @@ class VFSBot:
             in self.browser.page_source
         ):
             # update.message.reply_text("There are no appointments available.")
-            records = open("record.txt", "r+")
+            records = open("data/record.txt", "r+")
             last_date = records.readlines()[-1]
 
             if last_date != '0':
@@ -198,7 +198,7 @@ class VFSBot:
             time.sleep(2)
             new_date = self.browser.find_element(by=By.XPATH, value='//*[@id="lblDate"]').get_attribute('innerHTML')
 
-            records = open("record.txt", "r+")
+            records = open("data/record.txt", "r+")
             last_date = records.readlines()[-1]
 
             if new_date != last_date and len(new_date) > 0:

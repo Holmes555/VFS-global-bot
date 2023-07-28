@@ -34,7 +34,7 @@ class AdminHandler(Handler):
 
 
 def break_captcha():
-    image = cv2.imread("captcha.png")
+    image = cv2.imread("data/captcha.png")
     image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     image = cv2.copyMakeBorder(image, 5, 5, 5, 5, cv2.BORDER_CONSTANT, value=[250])
     image = cv2.filter2D(image, -1, np.ones((4, 4), np.float32) / 16)
