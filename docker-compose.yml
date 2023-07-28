@@ -1,0 +1,13 @@
+version: '3.7'
+
+services:
+
+  bot:
+    container_name: vfs_bot
+    build: .
+    restart: always
+    command: python -m service.main
+    volumes:
+      - ./service:/backend/service
+    env_file:
+      - .env
