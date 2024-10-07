@@ -15,15 +15,15 @@ from utils import *
 class VFSBot:
     def __init__(self):
         config = ConfigParser()
-        config.read('config.ini')
+        config.read("config.ini")
 
-        self.url = config.get('VFS', 'url')
-        self.email_str = config.get('VFS', 'email')
-        self.pwd_str = config.get('VFS', 'password')
-        self.interval = config.getint('DEFAULT', 'interval')
-        self.channel_id = config.get('TELEGRAM', 'channel_id')
-        token = config.get('TELEGRAM', 'auth_token')
-        admin_ids = list(map(int, config.get('TELEGRAM', 'admin_ids').split(" ")))
+        self.url = config.get("VFS", "url")
+        self.email_str = config.get("VFS", "email")
+        self.pwd_str = config.get("VFS", "password")
+        self.interval = config.getint("DEFAULT", "interval")
+        self.channel_id = config.get("TELEGRAM", "channel_id")
+        token = config.get("TELEGRAM", "auth_token")
+        admin_ids = list(map(int, config.get("TELEGRAM", "admin_ids").split(" ")))
 
         updater = Updater(token, use_context=True)
 
@@ -43,25 +43,29 @@ class VFSBot:
         if "You are now in line." in self.browser.page_source:
             update.message.reply_text("You are now in queue.")
 
-        WebDriverWait(self.browser, 600).until(EC.presence_of_element_located((By.NAME, 'EmailId')))
+        WebDriverWait(self.browser, 600).until(
+            EC.presence_of_element_located((By.NAME, "EmailId"))
+        )
         time.sleep(1)
 
-        self.browser.find_element(by=By.NAME, value='EmailId').send_keys(self.email_str)
-        self.browser.find_element(by=By.NAME, value='Password').send_keys(self.pwd_str)
+        self.browser.find_element(by=By.NAME, value="EmailId").send_keys(self.email_str)
+        self.browser.find_element(by=By.NAME, value="Password").send_keys(self.pwd_str)
 
         # update.message.reply_text("Sending Captcha...")
 
-        captcha_img = self.browser.find_element(by=By.ID, value='CaptchaImage')
+        captcha_img = self.browser.find_element(by=By.ID, value="CaptchaImage")
 
-        self.captcha_filename = 'data/captcha.png'
-        with open(self.captcha_filename, 'wb') as file:
+        self.captcha_filename = "data/captcha.png"
+        with open(self.captcha_filename, "wb") as file:
             file.write(captcha_img.screenshot_as_png)
 
         captcha = break_captcha()
 
-        self.browser.find_element(by=By.NAME, value='CaptchaInputText').send_keys(captcha)
+        self.browser.find_element(by=By.NAME, value="CaptchaInputText").send_keys(
+            captcha
+        )
         time.sleep(1)
-        self.browser.find_element(by=By.ID, value='btnSubmit').click()
+        self.browser.find_element(by=By.ID, value="btnSubmit").click()
 
         if "Reschedule Appointment" in self.browser.page_source:
             update.message.reply_text("Successfully logged in!")
@@ -72,13 +76,20 @@ class VFSBot:
                     update.message.reply_text("An WebError has occured.\nTrying again.")
                     raise WebError
                 except Offline:
-                    update.message.reply_text("Downloaded offline version. \nTrying again.")
+                    update.message.reply_text(
+                        "Downloaded offline version. \nTrying again."
+                    )
                     continue
                 except Exception as e:
-                    update.message.reply_text("An error has occured: " + e + "\nTrying again.")
+                    update.message.reply_text(
+                        "An error has occured: " + e + "\nTrying again."
+                    )
                     raise WebError
                 time.sleep(self.interval)
-        elif "Your account has been locked, please login after 2 minutes." in self.browser.page_source:
+        elif (
+            "Your account has been locked, please login after 2 minutes."
+            in self.browser.page_source
+        ):
             update.message.reply_text("Account locked.\nPlease wait 2 minutes.")
             time.sleep(120)
             return
@@ -103,15 +114,17 @@ class VFSBot:
                 continue
 
     def help(self, update, context):
-        update.message.reply_text("This is a VFS appointment bot!\nPress /start to begin.")
+        update.message.reply_text(
+            "This is a VFS appointment bot!\nPress /start to begin."
+        )
 
     def start(self, update, context):
         self.options = uc.ChromeOptions()
-        self.options.add_argument('--disable-gpu')
+        self.options.add_argument("--disable-gpu")
         # Uncomment the following line to run headless
         # self.options.add_argument('--headless=new')
 
-        if hasattr(self, 'thr') and self.thr is not None:
+        if hasattr(self, "thr") and self.thr is not None:
             update.message.reply_text("Bot is already running.")
             return
 
@@ -134,7 +147,10 @@ class VFSBot:
             pass
 
     def check_errors(self):
-        if "Server Error in '/Global-Appointment' Application." in self.browser.page_source:
+        if (
+            "Server Error in '/Global-Appointment' Application."
+            in self.browser.page_source
+        ):
             return True
         elif "Cloudflare" in self.browser.page_source:
             return True
@@ -154,20 +170,26 @@ class VFSBot:
     def check_appointment(self, update, context):
         time.sleep(5)
 
-        self.browser.find_element(by=By.XPATH, value='//*[@id="Accordion1"]/div/div[2]/div/ul/li[1]/a').click()
+        self.browser.find_element(
+            by=By.XPATH, value='//*[@id="Accordion1"]/div/div[2]/div/ul/li[1]/a'
+        ).click()
         if self.check_errors():
             raise WebError
         if self.check_offline():
             raise Offline
 
-        WebDriverWait(self.browser, 100).until(EC.presence_of_element_located((By.XPATH, '//*[@id="LocationId"]')))
+        WebDriverWait(self.browser, 100).until(
+            EC.presence_of_element_located((By.XPATH, '//*[@id="LocationId"]'))
+        )
 
         self.browser.find_element(by=By.XPATH, value='//*[@id="LocationId"]').click()
         if self.check_errors():
             raise WebError
         time.sleep(3)
 
-        self.browser.find_element(by=By.XPATH, value='//*[@id="LocationId"]/option[2]').click()
+        self.browser.find_element(
+            by=By.XPATH, value='//*[@id="LocationId"]/option[2]'
+        ).click()
         if self.check_errors():
             raise WebError
 
@@ -181,34 +203,46 @@ class VFSBot:
             records = open("data/record.txt", "r+")
             last_date = records.readlines()[-1]
 
-            if last_date != '0':
+            if last_date != "0":
                 context.bot.send_message(
-                    chat_id=self.channel_id, text="There are no appointments available right now."
+                    chat_id=self.channel_id,
+                    text="There are no appointments available right now.",
                 )
-                records.write('\n' + '0')
+                records.write("\n" + "0")
                 records.close
         else:
-            select = Select(self.browser.find_element(by=By.XPATH, value='//*[@id="VisaCategoryId"]'))
-            select.select_by_value('1314')
+            select = Select(
+                self.browser.find_element(
+                    by=By.XPATH, value='//*[@id="VisaCategoryId"]'
+                )
+            )
+            select.select_by_value("1314")
 
             WebDriverWait(self.browser, 100).until(
-                EC.presence_of_element_located((By.XPATH, '//*[@id="dvEarliestDateLnk"]'))
+                EC.presence_of_element_located(
+                    (By.XPATH, '//*[@id="dvEarliestDateLnk"]')
+                )
             )
 
             time.sleep(2)
-            new_date = self.browser.find_element(by=By.XPATH, value='//*[@id="lblDate"]').get_attribute('innerHTML')
+            new_date = self.browser.find_element(
+                by=By.XPATH, value='//*[@id="lblDate"]'
+            ).get_attribute("innerHTML")
 
             records = open("data/record.txt", "r+")
             last_date = records.readlines()[-1]
 
             if new_date != last_date and len(new_date) > 0:
-                context.bot.send_message(chat_id=self.channel_id, text=f"Appointment available on {new_date}.")
-                records.write('\n' + new_date)
+                context.bot.send_message(
+                    chat_id=self.channel_id,
+                    text=f"Appointment available on {new_date}.",
+                )
+                records.write("\n" + new_date)
                 records.close()
         # Uncomment if you want the bot to notify everytime it checks appointments.
         # update.message.reply_text("Checked!", disable_notification=True)
         return True
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     VFSbot = VFSBot()

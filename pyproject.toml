@@ -25,9 +25,9 @@ python = "3.10.6"
 numpy = "*"
 opencv-python = "*"
 pydantic = "*"
-pytesseract = "*"
 python-telegram-bot = "*"
 selenium = "*"
+selenium-recaptcha-solver = "*"
 undetected-chromedriver = "*"
 
 [tool.poetry.dev-dependencies]
